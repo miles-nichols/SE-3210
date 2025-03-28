@@ -1,0 +1,229 @@
+// Miles Nichols: milesn
+//X1 = size (parameter)
+//X0 is memory address of a[64] (parameter)
+ADDI X1, XZR, #16        // X1 = size (16)
+ADDI X0, XZR, #0        // Set X0 to memory address 0 (base address of array)
+SUBI SP, SP, #8
+LDUR LR, [SP, #0]    // Save link register (return address)
+BL fill                 // branch to fill with parameters X0 (a) and X1 (s)
+STUR LR, [SP, #0]       // Save link register (return address)
+ADDI SP, SP, #8        // Deallocate space for 2 registers
+// Save registers and return address before calling print_array
+SUBI SP, SP, #16        // allocate space for 2 registers
+STUR LR, [SP, #0]       // save link register (return address)
+STUR X0, [SP, #8]       // save register for address
+BL print_array          // print array before sorting
+PRNT X0
+PRNT X0
+PRNT X0
+BL heapsort             // branch to heapsort with params X0 (a) and X1 (s)
+BL print_array          // print array after sorting
+// Restore registers and return address after calling print_array
+LDUR LR, [SP, #0]       // restore link register
+LDUR X0, [SP, #8]       // restore saved register
+ADDI SP, SP, #16        // deallocate space for 2 registers
+
+HALT                    // end program
+
+fill:
+ADD X10, XZR, XZR        // i = 0
+SUBIS XZR, X1, #2        // set flag by comparing s and 2
+B.LT sizeLessThanTwo     // skip loop if s < 2
+
+fill_loop:
+LSR X9, X1, #1           // X9 = s/2
+SUBS XZR, X10, X9        // compare i and s/2
+B.GE iGreaterThanSDivTwo // exit loop if i >= s/2
+// First store: a[((s + 1) / 2) - (i + 1)] = i * 2
+ADDI X16, X1, #1         // X16 = s + 1
+LSR X16, X16, #1         // X16 /= 2
+SUBI X16, X16, #1        // X16 - 1
+SUB X16, X16, X10        // X16 = ((s + 1) / 2) - (i + 1)
+LSL X16, X16, #3         // Convert index to byte offset
+ADD X17, X0, X16         // X17 = address a[offset]
+LSL X18, X10, #1         // X18 = i * 2
+STUR X18, [X17, #0]      // Store i * 2
+// Second store: a[((s + 1) / 2) + i] = i * 2 + 1
+ADDI X16, X1, #1         // X16 = s + 1
+LSR X16, X16, #1         // X16 /= 2
+ADD X16, X16, X10        // X16 + i
+LSL X16, X16, #3         // Convert index to byte offset
+ADD X17, X0, X16         // X17 = address a[offset]
+ADDI X18, X18, #1        // X18 = (i * 2) + 1
+STUR X18, [X17, #0]      // Store i * 2 + 1
+ADDI X10, X10, #1        // i++
+B fill_loop              // Repeat loop
+
+sizeLessThanTwo:
+ANDI X11, X1, #1         // X11 = s & 1 (0 if even, 1 if odd)
+CBNZ X11, setFirstIndex  // Branch if s is odd
+BR LR                    // Return to caller
+
+iGreaterThanSDivTwo:
+ANDI X11, X1, #1         // X11 = s & 1 (0 if even, 1 if odd)
+CBNZ X11, setFirstIndex  // Branch if s is odd
+BR LR                    // Return to caller
+
+setFirstIndex:
+SUBI X13, X1, #1         // X13 = s - 1
+STUR X13, [X0, #0]       // a[0] = s - 1
+BR LR                    // Return to caller
+
+// print_array function
+print_array:
+SUBI SP, SP, #8          // Allocate space for 2 registers
+STUR LR, [SP, #0]        // Save return address
+ADD X10, XZR, XZR        // i = 0
+
+print_loop:
+SUBS XZR, X10, X1        // Compare i with size
+B.GE end_print           // Exit loop if i >= size
+LSL X11, X10, #3         // Convert index to byte offset (i * 8)
+ADD X12, X0, X11         // X12 = base address + offset
+LDUR X13, [X12, #0]      // Load array[i] into X13
+PRNT X13                 // Print array[i]
+ADDI X10, X10, #1        // i++
+B print_loop             // Repeat loop
+
+end_print:
+LDUR LR, [SP, #0]        // Restore return address
+ADDI SP, SP, #8          // Deallocate space for 2 registers
+BR LR                    // Return to caller
+
+heapsort:
+// Inputs:
+// X0 = address of the array (a)
+// X1 = size of the array (s)
+
+//Other Registers:
+//X19 = i
+SUBI SP, SP, #8
+STUR LR, [SP, #0]       // Save link register (return address)
+BL heapify               //heapify with param X0 and X1
+LDUR LR, [SP, #0]    // Save link register (return address)
+ADDI SP, SP, #8        // Deallocate space for 2 registers
+
+ADDI X19, XZR, #1        // i = 1
+heapsort_loop:
+SUBS XZR, X19, X1        //  compare i and size
+B.GE end_heapsort        // Exit loop if i >= size
+SUB X7, X1, X19          // X7 = parameter2: size - i
+LSL X7, X7, #3           // X7 = size - i * 8
+ADD X7, X0, X7           // X7 = a + (size - i) * 8
+ADD X6, X0, XZR          // X6 = a + 0 
+SUBI SP, SP, #8
+STUR LR, [SP, #0]       // Save link register (return address)
+BL swap                  //swap with param X6 (a + 0) and X7 (a + (s - i))
+LDUR LR, [SP, #0]    // Save link register (return address)
+ADDI SP, SP, #8        // Deallocate space for 2 registers
+SUB X4, X1, X19          // X4 = size - i
+ADD X5, XZR, XZR         // X5 = 0
+SUBI SP, SP, #8
+STUR LR, [SP, #0]       // Save link register (return address)
+BL percolate_down        //percolate_down with param X0, X4, and X5 (0)
+LDUR LR, [SP, #0]    // Save link register (return address)
+ADDI SP, SP, #8        // Deallocate space for 2 registers
+ADDI X19, X19, #1        // i++
+B heapsort_loop          // repeat loop
+
+end_heapsort:
+BR LR
+
+heapify:
+// Inputs:
+// X0 = address of the array (a)
+// X1 = size of the array (s)
+//Other Registers:
+//X20 = i
+ADDI X20, X1, #1          // i = size + 1
+LSR X20, X20, #1          // i /= 2
+
+heapify_loop:
+CBZ X20, endHeapifyLoop    // exit loop if i = 0
+ADD X5, XZR, X20           // X5 = X20 (i)
+ADD X4, X1, XZR            // X4 = size
+SUBI SP, SP, #8
+STUR LR, [SP, #0]       // Save link register (return address)
+BL percolate_down          // percolate_down with param X0 (a), X4 (s), and X5 (i)
+LDUR LR, [SP, #0]    // Save link register (return address)
+ADDI SP, SP, #8        // Deallocate space for 2 registers
+SUBI X20, X20, #1          // i--
+B heapify_loop             // repeat loop
+
+endHeapifyLoop: 
+ADD X5, XZR, XZR          // X5 (param i) = 0
+SUB X4, X1, XZR            // X4 = size
+SUBI SP, SP, #8
+STUR LR, [SP, #0]       // Save link register (return address)
+BL percolate_down         // percolate_down with param X0 (a), X4 (s), and X5 (i=0)
+LDUR LR, [SP, #0]    // Save link register (return address)
+ADDI SP, SP, #8        // Deallocate space for 2 registers
+BR LR
+
+swap:
+// Inputs:
+// X6 = address of the first element (a)
+// X7 = address of the second element (b)
+SUBI SP, SP, #8        // Allocate space on the stack
+STUR X21, [SP, #0]     // Save X21
+LDUR X21, [X6, #0]     // X21 = a
+LDUR X2, [X7, #0]      // X2 = b
+STUR X2, [X6, #0]      // &a = X2 (which is b)
+STUR X21, [X7, #0]     // &b = X15 (which is tmp)
+LDUR X21, [SP, #0]     // Restore X21
+ADDI SP, SP, #8        // Deallocate space from the stack
+BR LR                  // Return
+
+percolate_down:
+// Inputs:
+// X0 = address of the array (a)
+// X4 = size of the array (s)
+// X5 = index of the element to percolate down (i)
+//Other Registers:
+//X13 =  Child
+//X14 =  child + 1
+//X9 = temp
+LSL X13, X5, #1             // (child) = 2 * i
+ADDI X13, X13, #1           // X13 (child) = 2 * i + 1
+percolate_down_loop:        // loop label
+SUBS XZR, X13, X4           // Compare child index with size
+B.GE end_percolate_down     // Exit loop and function if child >= size
+ADDI X14, X13, #1           // X14 = child + 1
+SUBS XZR, X14, X4           // Compare child + 1 with size
+B.GE i_vs_child             // Exit if (child + 1) >= size
+
+LSL X9, X13, #3             // X9 = child * 8
+ADD X9, X0, X9              // X9 = &a[child]
+LDUR X15, [X9, #0]          // Load a[child] into X15
+LSL X9, X14, #3             // X9 = (child + 1) * 8
+ADD X9, X0, X9              // X9 = &a[child + 1]
+LDUR X16, [X9, #0]          // Load a[child + 1] into X16
+SUBS XZR, X15, X16          // Compare a[child] with a[child + 1]
+B.GE i_vs_child             // Exit if a[child] >= a[child + 1]
+ADDI X13, X13, #1           // child++
+B i_vs_child                // branch to i_vs_child to check if a[i] < a[child]
+
+i_vs_child:
+LSL X6, X5, #3              // X6 = i * 8
+ADD X6, X0, X6              // X6 = &a[i]
+LDUR X16, [X6, #0]          // Load a[i] into X16
+LSL X7, X13, #3             // X7 = child * 8
+ADD X7, X0, X7              // X7 = &a[child]
+LDUR X15, [X7, #0]          // Load a[child] into X15
+SUBS XZR, X16, X15          // Compare a[i] with a[child]
+B.GE next_itteration        // Exit if a[i] >= a[child]
+SUBI SP, SP, #8
+STUR LR, [SP, #0]       // Save link register (return address)
+BL swap                     // swap(&a[i], &a[child]) with params X6 (a) and X7 (b)
+LDUR LR, [SP, #0]    // Save link register (return address)
+ADDI SP, SP, #8        // Deallocate space for 2 registers
+B next_itteration
+
+next_itteration:
+ADD X5, XZR, X13            // i = child
+LSL X13, X5, #1             // X13 = 2 * i
+ADDI X13, X13, #1           // child = (2 * i) + 1
+B percolate_down_loop       // loop
+
+end_percolate_down:
+BR LR                       // Return
