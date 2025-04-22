@@ -1,0 +1,54 @@
+// LEGv8 Test Program with All Required Instructions
+// Labels are made as "label" + instructionCount for branch targets starting from 1
+
+// R-Type Instructions
+label1:
+ADD X0, X1, X2        // Add registers
+label2:
+AND X3, X4, X5        // Bitwise AND
+SUB X6, X7, X8        // Subtract
+MUL X9, X10, X11      // Multiply
+ORR X12, X13, X14     // Bitwise OR
+EOR X15, X16, X17     // Bitwise XOR
+LSL X18, X19, #5      // Logical shift left
+LSR X20, X21, #3      // Logical shift right
+PRNT X22              // Print register (custom)
+PRNL                  // Print newline (custom)
+DUMP                  // Dump state (custom)
+HALT                  // Halt execution (custom)
+
+// I-Type Instructions
+ADDI X23, X24, #42    // Add immediate
+ANDI X25, X26, #0xFF  // AND immediate
+SUBI X27, X28, #10    // Subtract immediate
+SUBIS X29, X30, #5    // Subtract immediate and set flags
+ORRI X0, X1, #1       // OR immediate
+EORI X2, X3, #0xAA    // XOR immediate
+
+// D-Type Instructions
+LDUR X4, [X5, #8]     // Load register (offset 8)
+STUR X6, [X7, #16]    // Store register (offset 16)
+
+// B-Type Instructions
+B label1                  // Unconditional branch
+BL label2                 // Branch with link
+
+// CB-Type Instructions
+CBZ X8, label1            // Compare and branch if zero
+CBNZ X9, label1           // Compare and branch if not zero
+
+// B.cond Instructions (conditional branches)
+B.EQ label1               // Branch if equal
+B.NE label1               // Branch if not equal
+B.HS label1               // Branch if higher or same (unsigned)
+B.LO label1               // Branch if lower (unsigned)
+B.MI label1               // Branch if negative
+B.PL label1              // Branch if positive
+B.VS label1              // Branch if overflow
+B.VC label1              // Branch if no overflow
+B.HI label1              // Branch if higher (unsigned)
+B.LS label1              // Branch if lower or same (unsigned)
+B.GE label1              // Branch if greater or equal (signed)
+B.LT label1              // Branch if less than (signed)
+B.GT label1              // Branch if greater than (signed)
+B.LE label1              // Branch if less or equal (signed)
