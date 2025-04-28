@@ -1,12 +1,14 @@
 package disassembler;
 
-//big endian is bit 0 is MSB -> bit n LSB
-
+/**
+ * The InstructionDecoder class is responsible for decoding LEGv8 instructions.
+ * It takes an instruction and decodes it into its components, matching it against
+ * a predefined set of LEGv8 instructions.
+ */
 public class InstructionDecoder {
 
     // LEGv8 required instruction set
     public LEGv8Instruction[] instructions = {
-            // Arithmetic
             new LEGv8Instruction("ADD", 0b10001011000, "R"),
             new LEGv8Instruction("ADDI", 0b1001000100, "I"),
             new LEGv8Instruction("SUB", 0b11001011000, "R"),
@@ -14,24 +16,16 @@ public class InstructionDecoder {
             new LEGv8Instruction("SUBIS", 0b1111000100, "I"),
             new LEGv8Instruction("SUBS", 0b11101011000, "R"),
             new LEGv8Instruction("MUL", 0b10011011000, "R"),
-
-            // Logical
             new LEGv8Instruction("AND", 0b10001010000, "R"),
             new LEGv8Instruction("ANDI", 0b1001001000, "I"),
             new LEGv8Instruction("ORR", 0b10101010000, "R"),
             new LEGv8Instruction("ORRI", 0b1011001000, "I"),
             new LEGv8Instruction("EOR", 0b11001010000, "R"),
             new LEGv8Instruction("EORI", 0b1101001000, "I"),
-
-            // Shift
             new LEGv8Instruction("LSL", 0b11010011011, "R"),
             new LEGv8Instruction("LSR", 0b11010011010, "R"),
-
-            // Memory
             new LEGv8Instruction("LDUR", 0b11111000010, "D"),
             new LEGv8Instruction("STUR", 0b11111000000, "D"),
-
-            // Branch
             new LEGv8Instruction("B", 0b000101, "B"),
             new LEGv8Instruction("B.EQ", 0b01010100, "CB"),    // 0
             new LEGv8Instruction("B.NE", 0b01010100, "CB"),    // 1
@@ -51,8 +45,6 @@ public class InstructionDecoder {
             new LEGv8Instruction("BR", 0b11010110000, "R"),
             new LEGv8Instruction("CBNZ", 0b10110101, "CB"),
             new LEGv8Instruction("CBZ", 0b10110100, "CB"),
-
-            // Special
             new LEGv8Instruction("PRNT", 0b11111111101, "R"),
             new LEGv8Instruction("PRNL", 0b11111111100, "R"),
             new LEGv8Instruction("DUMP", 0b11111111110, "R"),
@@ -79,6 +71,11 @@ public class InstructionDecoder {
         this.instruction = instruction;
     }
 
+    /**
+     * Decodes the instruction by extracting the opcode and calling the matchOpcode method.
+     * @param instruction
+     * @param count
+     */
     public void decode(Instruction instruction, int count) {
         //get possible opcodes
         opcode6 = (instruction.getValue() >>> 26) & 0b111111;    // 6 bits
@@ -89,7 +86,9 @@ public class InstructionDecoder {
         matchOpcode();
     }
 
-    //sets the valid instruction to rightInst
+    /**
+     * Matches the opcode with the LEGv8 instruction set and calls the buildInstruction method.
+     */
     public void matchOpcode() {
         for (LEGv8Instruction inst : instructions) {
             if (inst.getOpcode() == opcode6 || inst.getOpcode() == opcode8 || inst.getOpcode() == opcode10 || inst.getOpcode() == opcode11) {
@@ -101,6 +100,9 @@ public class InstructionDecoder {
         System.out.println("No matching instruction found.");
     }
 
+    /**
+     * Builds the instruction string based on the decoded components.
+     */
     public void buildInstruction() {
         Rm = (instruction.getValue() >>> 16) & 0b11111; //get 20-16 bits by putting bit 16 on the LSB and getting the first 5
         shamt = (instruction.getValue() >>> 10) & 0b111111; //get bits 15-10 by putting bit 10 on the LSB and getting the first 6
@@ -156,6 +158,11 @@ public class InstructionDecoder {
         }
     }
 
+    /**
+     * Returns the condition name based on the instruction value.
+     * @param instructionValue
+     * @return condition name
+     */
     private String getConditionName(int instructionValue) {
         int condition = instruction.getValue() & 0b1111; // Extract bits [3:0]
         switch (condition) {

@@ -1,54 +1,179 @@
-// LEGv8 Test Program with All Required Instructions
-// Labels are made as "label" + instructionCount for branch targets starting from 1
-
-// R-Type Instructions
-label1:
-ADD X0, X1, X2        // Add registers
-label2:
-AND X3, X4, X5        // Bitwise AND
-SUB X6, X7, X8        // Subtract
-MUL X9, X10, X11      // Multiply
-ORR X12, X13, X14     // Bitwise OR
-EOR X15, X16, X17     // Bitwise XOR
-LSL X18, X19, #5      // Logical shift left
-LSR X20, X21, #3      // Logical shift right
-PRNT X22              // Print register (custom)
-PRNL                  // Print newline (custom)
-DUMP                  // Dump state (custom)
-HALT                  // Halt execution (custom)
-
-// I-Type Instructions
-ADDI X23, X24, #42    // Add immediate
-ANDI X25, X26, #0xFF  // AND immediate
-SUBI X27, X28, #10    // Subtract immediate
-SUBIS X29, X30, #5    // Subtract immediate and set flags
-ORRI X0, X1, #1       // OR immediate
-EORI X2, X3, #0xAA    // XOR immediate
-
-// D-Type Instructions
-LDUR X4, [X5, #8]     // Load register (offset 8)
-STUR X6, [X7, #16]    // Store register (offset 16)
-
-// B-Type Instructions
-B label1                  // Unconditional branch
-BL label2                 // Branch with link
-
-// CB-Type Instructions
-CBZ X8, label1            // Compare and branch if zero
-CBNZ X9, label1           // Compare and branch if not zero
-
-// B.cond Instructions (conditional branches)
-B.EQ label1               // Branch if equal
-B.NE label1               // Branch if not equal
-B.HS label1               // Branch if higher or same (unsigned)
-B.LO label1               // Branch if lower (unsigned)
-B.MI label1               // Branch if negative
-B.PL label1              // Branch if positive
-B.VS label1              // Branch if overflow
-B.VC label1              // Branch if no overflow
-B.HI label1              // Branch if higher (unsigned)
-B.LS label1              // Branch if lower or same (unsigned)
-B.GE label1              // Branch if greater or equal (signed)
-B.LT label1              // Branch if less than (signed)
-B.GT label1              // Branch if greater than (signed)
-B.LE label1              // Branch if less or equal (signed)
+//Heapsort in LEGv8 Assembly Language to test the disasembler.         
+        ADDI X1, X31, #16
+        ADDI X0, X31, #0
+        SUBI X28, X28, #8
+        LDUR X30, [X28, #0]
+        BL label21
+        STUR X30, [X28, #0]
+        ADDI X28, X28, #8
+        SUBI X28, X28, #16
+        STUR X30, [X28, #0]
+        STUR X0, [X28, #8]
+        BL label53
+        PRNT X0
+        PRNT X0
+        PRNT X0
+        BL label67
+        BL label53
+        LDUR X30, [X28, #0]
+        LDUR X0, [X28, #8]
+        ADDI X28, X28, #16
+        HALT
+label21:
+        ADD X10, X31, X31
+        SUBIS X31, X1, #2
+        B.LT label44
+label24:
+        LSR X9, X1, #1
+        SUBS X31, X10, X9
+        B.GE label47
+        ADDI X16, X1, #1
+        LSR X16, X16, #1
+        SUBI X16, X16, #1
+        SUB X16, X16, X10
+        LSL X16, X16, #3
+        ADD X17, X0, X16
+        LSL X18, X10, #1
+        STUR X18, [X17, #0]
+        ADDI X16, X1, #1
+        LSR X16, X16, #1
+        ADD X16, X16, X10
+        LSL X16, X16, #3
+        ADD X17, X0, X16
+        ADDI X18, X18, #1
+        STUR X18, [X17, #0]
+        ADDI X10, X10, #1
+        B label24
+label44:
+        ANDI X11, X1, #1
+        CBNZ X11, label50
+        BR X30
+label47:
+        ANDI X11, X1, #1
+        CBNZ X11, label50
+        BR X30
+label50:
+        SUBI X13, X1, #1
+        STUR X13, [X0, #0]
+        BR X30
+label53:
+        SUBI X28, X28, #8
+        STUR X30, [X28, #0]
+        ADD X10, X31, X31
+label56:
+        SUBS X31, X10, X1
+        B.GE label64
+        LSL X11, X10, #3
+        ADD X12, X0, X11
+        LDUR X13, [X12, #0]
+        PRNT X13
+        ADDI X10, X10, #1
+        B label56
+label64:
+        LDUR X30, [X28, #0]
+        ADDI X28, X28, #8
+        BR X30
+label67:
+        SUBI X28, X28, #8
+        STUR X30, [X28, #0]
+        BL label94
+        LDUR X30, [X28, #0]
+        ADDI X28, X28, #8
+        ADDI X19, X31, #1
+label73:
+        SUBS X31, X19, X1
+        B.GE label93
+        SUB X7, X1, X19
+        LSL X7, X7, #3
+        ADD X7, X0, X7
+        ADD X6, X0, X31
+        SUBI X28, X28, #8
+        STUR X30, [X28, #0]
+        BL label114
+        LDUR X30, [X28, #0]
+        ADDI X28, X28, #8
+        SUB X4, X1, X19
+        ADD X5, X31, X31
+        SUBI X28, X28, #8
+        STUR X30, [X28, #0]
+        BL label123
+        LDUR X30, [X28, #0]
+        ADDI X28, X28, #8
+        ADDI X19, X19, #1
+        B label73
+label93:
+        BR X30
+label94:
+        ADDI X20, X1, #1
+        LSR X20, X20, #1
+label96:
+        CBZ X20, label106
+        ADD X5, X31, X20
+        ADD X4, X1, X31
+        SUBI X28, X28, #8
+        STUR X30, [X28, #0]
+        BL label123
+        LDUR X30, [X28, #0]
+        ADDI X28, X28, #8
+        SUBI X20, X20, #1
+        B label96
+label106:
+        ADD X5, X31, X31
+        SUB X4, X1, X31
+        SUBI X28, X28, #8
+        STUR X30, [X28, #0]
+        BL label123
+        LDUR X30, [X28, #0]
+        ADDI X28, X28, #8
+        BR X30
+label114:
+        SUBI X28, X28, #8
+        STUR X21, [X28, #0]
+        LDUR X21, [X6, #0]
+        LDUR X2, [X7, #0]
+        STUR X2, [X6, #0]
+        STUR X21, [X7, #0]
+        LDUR X21, [X28, #0]
+        ADDI X28, X28, #8
+        BR X30
+label123:
+        LSL X13, X5, #1
+        ADDI X13, X13, #1
+label125:
+        SUBS X31, X13, X4
+        B.GE label158
+        ADDI X14, X13, #1
+        SUBS X31, X14, X4
+        B.GE label140
+        LSL X9, X13, #3
+        ADD X9, X0, X9
+        LDUR X15, [X9, #0]
+        LSL X9, X14, #3
+        ADD X9, X0, X9
+        LDUR X16, [X9, #0]
+        SUBS X31, X15, X16
+        B.GE label140
+        ADDI X13, X13, #1
+        B label140
+label140:
+        LSL X6, X5, #3
+        ADD X6, X0, X6
+        LDUR X16, [X6, #0]
+        LSL X7, X13, #3
+        ADD X7, X0, X7
+        LDUR X15, [X7, #0]
+        SUBS X31, X16, X15
+        B.GE label154
+        SUBI X28, X28, #8
+        STUR X30, [X28, #0]
+        BL label114
+        LDUR X30, [X28, #0]
+        ADDI X28, X28, #8
+        B label154
+label154:
+        ADD X5, X31, X13
+        LSL X13, X5, #1
+        ADDI X13, X13, #1
+        B label125
+label158:
+        BR X30

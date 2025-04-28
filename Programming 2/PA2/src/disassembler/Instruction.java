@@ -1,5 +1,9 @@
 package disassembler;
 
+/**
+ * Instruction class represents a single instruction in the disassembler.
+ * It contains information about the instruction type, label, value, and other properties.
+ */
 public class Instruction {
     private String type;
     private String label;
